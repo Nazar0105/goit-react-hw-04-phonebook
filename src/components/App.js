@@ -1,19 +1,16 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import ContactForm from './ContactForm/ContactForm';
 import Filter from './Filter/Filter';
 import ContactList from './ContactList/ContactList';
 import styles from './App.module.css';
-import { nanoid } from 'nanoid';
 
-function App() {
+const App = () => {
   const [contacts, setContacts] = useState([]);
   const [filter, setFilter] = useState('');
 
   useEffect(() => {
-    const savedContacts = localStorage.getItem('contacts');
-    if (savedContacts) {
-      setContacts(JSON.parse(savedContacts));
-    }
+    const savedContacts = JSON.parse(localStorage.getItem('contacts')) || [];
+    setContacts(savedContacts);
   }, []);
 
   useEffect(() => {
@@ -21,36 +18,28 @@ function App() {
   }, [contacts]);
 
   const handleFilterChange = (e) => {
-    const { value } = e.target;
-    setFilter(value);
+    setFilter(e.target.value);
   };
 
   const handleAddContact = (name, number) => {
-    const isContactExists = contacts.some((contact) => contact.name === name);
-
-    if (isContactExists) {
-      alert(`${name} вже є у вашій книзі!`);
+    if (contacts.find((contact) => contact.name === name)) {
+      alert(`${name} is already in contacts.`);
       return;
     }
 
-    const contactToAdd = {
-      name,
-      number,
-      id: nanoid(),
-    };
-
-    setContacts((prevContacts) => [...prevContacts, contactToAdd]);
+    const newContact = { id: Date.now(), name, number };
+    setContacts((prevContacts) => [...prevContacts, newContact]);
   };
 
-  const handleDeleteContact = (contactId) => {
-    setContacts((prevContacts) =>
-      prevContacts.filter((contact) => contact.id !== contactId)
-    );
-  };
-
-  const filteredContacts = contacts.filter((contact) =>
+  const visibleContacts = contacts.filter((contact) =>
     contact.name.toLowerCase().includes(filter.toLowerCase())
   );
+
+  const handleDeleteContact = (id) => {
+    setContacts((prevContacts) =>
+      prevContacts.filter((contact) => contact.id !== id)
+    );
+  };
 
   return (
     <div className={styles.container}>
@@ -59,12 +48,11 @@ function App() {
       <h2>Contacts</h2>
       <Filter value={filter} onChange={handleFilterChange} />
       <ContactList
-        contacts={filteredContacts}
+        contacts={visibleContacts}
         onDeleteContact={handleDeleteContact}
       />
     </div>
   );
-}
+};
 
 export default App;
-

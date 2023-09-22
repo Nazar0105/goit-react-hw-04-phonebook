@@ -8,7 +8,7 @@ const ContactForm = ({ onAddContact }) => {
     const { name, value } = e.target;
     if (name === 'name') {
       setName(value);
-    } else if (name === 'number') {
+    } else {
       setNumber(value);
     }
   };
